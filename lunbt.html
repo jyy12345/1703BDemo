@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        *{margin:0;padding:0;}
+        ul,li{list-style: none;}
+        .pics{width:255px;height:400px;margin:0 auto;overflow: scroll;}
+        .imgs{width:1020px;height:400px;}
+        .imgs img{float:left;width:255px;}
+        .imgNum{width:255px;margin:0 auto;}
+        .imgNum li{float:left;width:63px;text-align:center;font-size:20px;margin:20px 0;}
+        .imgNum li.selected{color:#fff;background:red;}
+        .direct{width:255px;margin:0 auto;position:relative;font-size: 40px;  }
+        .direct span.left{display:block;position:absolute;left:-50px;top:10px;}
+        .direct span.right{display:block;position:absolute;right:-50px;top:10px;}
+        .imgArea{overflow:hidden;}
+    </style>
+</head>
+<body>
+<div id="imgArea1" class="imgArea">
+    <div class="pics">
+        <div class="imgs">
+            <img src="img/1.jpg"/>
+            <img src="img/2.jpg"/>
+            <img src="img/3.jpg"/>
+            <img src="img/4.jpg"/>
+        </div>
+    </div>
+    <div class="direct">
+        <span class="left">←</span>
+        <span class="right">→</span>
+    </div>
+    <ul class="imgNum">
+        <li class="selected">1</li>
+        <li>2</li>
+        <li>3</li>
+        <li>4</li>
+    </ul>
+</div>
+<script>
+    function ImgScroll(bigImgScroll){
+        this.imgArea=document.getElementById(bigImgScroll);//轮播图最大div
+        this.pics=this.imgArea.getElementsByClassName("pics")[0];//放图片div
+        this.imgs=this.imgArea.getElementsByTagName("img");//图片
+        this.spans=this.imgArea.getElementsByTagName("span");//左右
+        this.lis=this.imgArea.getElementsByTagName("li");//li
+        this.time=null;
+        this.moveStatus=true;
+        this.autoNum=0;
+        this.time2=null;
+        this.init();
+    }
+    ImgScroll.prototype={
+        constructor:ImgScroll,
+        init:function(){
+            this.clock();
+            this.clk();
+            this.leftClk();
+            this.rightClk();
+        },
+        moveTo:function(startPos,endPos) {
+            var _this=this;
+            if (this.time) {
+                clearInterval(this.time);
+            }
+            this.startPos=startPos;
+            this.endPos=endPos;
+            this.step=0;
+            this.stepMax=20;
+            this.everyStep=(this.endPos-this.startPos)/this.stepMax;
+            this.time=setInterval(function(){
+                _this.move();
+            },25);
+        },
+        move:function () {
+            this.step++;
+            this.pics.scrollLeft+=this.everyStep;
+            if(this.step==this.stepMax){
+                clearInterval(this.time);
+                this.moveStatus=true;
+                this.pics.scrollLeft=this.endPos;
+            }
+        },
+        autoMove:function () {
+            this.autoNum++;
+            if(this.autoNum==this.imgs.length){
+                this.autoNum=0;
+            }
+            if(this.autoNum==-1){
+                this.autoNum=this.imgs.length-1;
+            }
+            this.btnColor();
+            this.moveTo(this.pics.scrollLeft,this.imgs[0].offsetWidth*this.autoNum);
+        },
+        clock:function(){
+            var _this=this;
+            this.time2=setInterval(function(){
+                _this.autoMove();
+            },2000)
+        },
+        clearClock:function () {
+            if (this.time2) {
+                clearInterval(this.time2);
+            }
+        },
+        btnColor:function () {
+            for(var i=0;i<this.lis.length;i++){
+                this.lis[i].className="";
+            }
+            this.lis[this.autoNum].className="selected";
+        },
+        clk:function(){
+            var _this=this;
+            for(var k=0;k<this.lis.length;k++){
+                this.lis[k].onclick=function () {
+                    _this.clearClock();
+                    for(var j=0;j<_this.lis.length;j++){
+                        if(this==_this.lis[j]){
+                            _this.autoNum=j;
+                            _this.btnColor();
+                            _this.moveTo(_this.pics.scrollLeft,_this.imgs[0].offsetWidth*j);
+                        }
+                    }
+                }
+            }
+        },
+        leftClk:function(){
+            var _this=this;
+            this.spans[0].onclick=function () {
+                _this.clearClock();
+                if(_this.moveStatus){
+                    _this.moveStatus=false;
+                    _this.autoNum-=2;
+                    _this.autoMove();
+                    _this.clock();
+                }
+            };
+        },
+        rightClk:function(){
+            var _this=this;
+            this.spans[1].onclick=function () {
+                _this.clearClock();
+                if(_this.moveStatus){
+                    _this.moveStatus=false;
+                    _this.autoMove();
+                    _this.clock();
+                }
+            }
+        }
+    };
+    var ImgScroll1=new ImgScroll("imgArea1");
+</script>
+</body>
+</html>
